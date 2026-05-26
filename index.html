@@ -1,218 +1,217 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-  <style>
-    body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-y: auto; }
-    .player-container { background: linear-gradient(180deg, #282828 0%, #181818 100%); padding: 30px; border-radius: 20px; box-shadow: 0 12px 36px rgba(0,0,0,0.7); text-align: center; width: 480px; border: 1px solid #3e3e3e; margin: 20px; }
-    h2 { margin: 0 0 5px 0; font-size: 24px; letter-spacing: 0.5px; }
-    h3 { margin: 0 0 20px 0; font-size: 14px; color: #b3b3b3; font-weight: 400; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HardloopApp Pro</title>
+<style>
+    body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    #status-bar { background: #1e1e1e; padding: 20px; border-radius: 20px; border: 2px solid #2ecc71; width: 100%; max-width: 450px; text-align: center; margin-bottom: 10px; position: sticky; top: 10px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    #timer { font-size: 4rem; font-weight: bold; font-family: monospace; color: #2ecc71; margin: 5px 0; }
+    #current-mode { font-size: 1.2rem; font-weight: bold; text-transform: uppercase; color: #1DB954; }
+    #player-ui { background: #282828; padding: 15px; border-radius: 15px; width: 100%; max-width: 420px; margin-bottom: 20px; border-bottom: 4px solid #1DB954; }
+    #track-name { font-size: 0.85rem; color: #1DB954; font-weight: bold; text-align: center; margin-bottom: 10px; height: 1.2rem; overflow: hidden; }
+    audio { width: 100%; height: 35px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); }
     
-    .upload-section { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 25px; background: #000; padding: 15px; border-radius: 12px; border: 1px solid #282828; }
-    .upload-box { flex: 1; text-align: center; }
-    .upload-label { display: block; background: #3e3e3e; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: background 0.2s; border: 1px dashed #555; }
-    .upload-label:hover { background: #4e4e4e; }
-    .file-input { display: none; }
-    .file-count { font-size: 11px; color: #888; margin-top: 5px; display: block; }
+    .management-section { background: #1e1e1e; padding: 15px; border-radius: 15px; width: 100%; max-width: 420px; margin-bottom: 20px; border: 1px solid #333; }
+    .upload-section { display: flex; gap: 10px; margin-bottom: 15px; }
+    .upload-btn { flex: 1; background: #333; padding: 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; border: 1px dashed #555; text-align: center; font-weight: bold; }
+    .upload-btn:hover { background: #444; }
+    
+    .track-list { max-height: 150px; overflow-y: auto; text-align: left; font-size: 0.8rem; background: #000; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
+    .track-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #222; }
+    .delete-btn { background: #e74c3c; color: white; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+    .delete-btn:hover { background: #c0392b; }
+    .toggle-list-btn { background: none; border: none; color: #888; font-size: 0.75rem; cursor: pointer; text-decoration: underline; margin-top: 5px; }
 
-    .btn { background: #1db954; color: white; border: none; padding: 16px 40px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4); width: 100%; box-sizing: border-box; }
-    .btn:hover { background: #1ed760; transform: scale(1.02); box-shadow: 0 6px 20px rgba(29, 185, 84, 0.6); }
-    .btn:disabled { background: #444; color: #888; box-shadow: none; cursor: not-allowed; transform: none; }
-    
-    .status-box { background: #000000; padding: 15px; border-radius: 10px; margin-top: 25px; border: 1px solid #282828; }
-    .status-title { font-size: 14px; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-    .track-name { margin-top: 8px; font-size: 18px; color: #1db954; font-weight: 600; min-height: 24px; }
-    .shuffle-tag { display: inline-block; background: #2d2d2d; color: #1db954; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-top: 10px; border: 1px solid #1db954; }
-    
-    .visualizer-container { display: flex; justify-content: center; align-items: flex-end; height: 50px; margin-top: 20px; gap: 6px; }
-    .wave-bar { width: 6px; height: 8px; background: linear-gradient(to top, #1db954, #1ed760); border-radius: 3px; display: none; }
-    @keyframes bounce { 0%, 100% { height: 10px; } 50% { height: 50px; } }
-  </style>
+    .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; width: 100%; max-width: 600px; padding-bottom: 50px; }
+    .lesson-card { background: #181818; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
+    .start-btn { width: 100%; padding: 10px; background: #2ecc71; border: none; color: black; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+    input[type="file"] { display: none; }
+    #loader { font-size: 0.75rem; color: #888; }
+</style>
 </head>
 <body>
 
-  <div class="player-container">
-    <h2>Muziek Router Dashboard</h2>
-    <h3>Bestanden blijven bewaard in je browser</h3>
-    
+<div id="status-bar">
+    <div id="loader">Database opstarten...</div>
+    <div id="current-mode">Kies een les</div>
+    <div id="timer">00:00</div>
+</div>
+
+<div id="player-ui">
+    <div id="track-name">Geen muziek</div>
+    <audio id="mainPlayer" controls></audio>
+</div>
+
+<div class="management-section">
     <div class="upload-section">
-      <div class="upload-box">
-        <label for="input-A" class="upload-label">📂 Kies Playlist A</label>
-        <input type="file" id="input-A" class="file-input" accept="audio/*" multiple onchange="handleFileSelection('A')">
-        <span id="count-A" class="file-count">Laden...</span>
-      </div>
-      <div class="upload-box">
-        <label for="input-B" class="upload-label">📂 Kies Playlist B</label>
-        <input type="file" id="input-B" class="file-input" accept="audio/*" multiple onchange="handleFileSelection('B')">
-        <span id="count-B" class="file-count">Laden...</span>
-      </div>
+        <label class="upload-btn">➕ Wandel MP3's<input type="file" id="upW" accept="audio/mp3" multiple onchange="addFilesToDB('W', this)"></label>
+        <label class="upload-btn">➕ Hardloop MP3's<input type="file" id="upL" accept="audio/mp3" multiple onchange="addFilesToDB('L', this)"></label>
     </div>
-
-    <button id="start-btn" class="btn" onclick="startPlayer()" disabled>Muziek laden...</button>
-    
-    <div class="visualizer-container" id="visualizer">
-      <div class="wave-bar" style="animation: bounce 0.8s ease-in-out infinite alternate; animation-delay: 0.1s;"></div>
-      <div class="wave-bar" style="animation: bounce 1.1s ease-in-out infinite alternate; animation-delay: 0.4s;"></div>
-      <div class="wave-bar" style="animation: bounce 0.9s ease-in-out infinite alternate; animation-delay: 0.2s;"></div>
-      <div class="wave-bar" style="animation: bounce 1.3s ease-in-out infinite alternate; animation-delay: 0.6s;"></div>
-      <div class="wave-bar" style="animation: bounce 1.0s ease-in-out infinite alternate; animation-delay: 0.3s;"></div>
+    <center>
+        <button class="toggle-list-btn" onclick="toggleTrackList()">Toon/Verberg opgeslagen nummers</button>
+    </center>
+    <div id="trackListWrapper" class="track-list">
+        <strong>Wandelijst (W):</strong><div id="list-W"></div><br>
+        <strong>Hardlooplijst (L):</strong><div id="list-L"></div>
     </div>
+</div>
 
-    <div class="status-box">
-      <div id="status" class="status-title">Systeem wordt opgestart</div>
-      <div id="track" class="track-name">Moment geduld...</div>
-      <div id="shuffle-indicator" class="shuffle-tag" style="display:none;">🔀 LOCALE OPSLAG & SHUFFLE ACTIEF</div>
-    </div>
-  </div>
+<div class="lesson-grid" id="lessonGrid"></div>
 
-  <script>
-    var db;
-    var rawFilesA = [];
-    var rawFilesB = [];
-    var shuffledPlaylist = [];
-    var currentIndex = 0;
-    var currentPlaylist = 'A';
-    var activeAudio = new Audio();
-    var isPlaying = false;
+<script>
+    const player = document.getElementById('mainPlayer');
+    let db;
+    let playlists = { w: [], l: [] };
+    let timerInterval = null;
 
-    // Start direct de database op zodra de pagina opent
-    initDatabase();
-
-    function initDatabase() {
-      var request = indexedDB.open("MusicRouterDB", 1);
-      
-      request.onupgradeneeded = function(e) {
-        db = e.target.result;
-        if (!db.objectStoreNames.contains("playlistA")) db.createObjectStore("playlistA", { autoIncrement: true });
-        if (!db.objectStoreNames.contains("playlistB")) db.createObjectStore("playlistB", { autoIncrement: true });
-      };
-
-      request.onsuccess = function(e) {
-        db = e.target.result;
-        // Haal direct de opgeslagen muziek van de vorige keer op
-        loadSavedMusic('A');
-        loadSavedMusic('B');
-      };
+    // 1. Grid van de 30 lessen DIRECT opbouwen (Zodat dit ALTIJD zichtbaar is, ongeacht de database)
+    function bouwLessenGrid() {
+        const grid = document.getElementById('lessonGrid');
+        grid.innerHTML = ""; // Maak leeg voor de zekerheid
+        for (let i = 1; i <= 30; i++) {
+            const card = document.createElement('div');
+            card.className = 'lesson-card';
+            card.innerHTML = `<strong>Les ${i}</strong><button class="start-btn" onclick="runLes(${i})">START</button>`;
+            grid.appendChild(card);
+        }
     }
 
-    function loadSavedMusic(type) {
-      var transaction = db.transaction(["playlist" + type], "readonly");
-      var store = transaction.objectStore("playlist" + type);
-      var getAllRequest = store.getAll();
-
-      getAllRequest.onsuccess = function() {
-        if (type === 'A') rawFilesA = getAllRequest.result;
-        if (type === 'B') rawFilesB = getAllRequest.result;
+    // 2. Database initialisatie (IndexedDB)
+    function initDB() {
+        const request = indexedDB.open("HardloopAppDB", 1);
         
-        document.getElementById('count-' + type).innerHTML = getAllRequest.result.length + " nummers bewaard";
-        checkButtonStatus();
-      };
-    }
-
-    function handleFileSelection(type) {
-      var input = document.getElementById('input-' + type);
-      var files = Array.from(input.files);
-      if (files.length === 0) return;
-
-      document.getElementById('count-' + type).innerHTML = "Bezig met opslaan...";
-
-      // Wis oude data in de database voor deze playlist
-      var transaction = db.transaction(["playlist" + type], "readwrite");
-      var store = transaction.objectStore("playlist" + type);
-      store.clear();
-
-      var savedCount = 0;
-      files.forEach(function(file) {
-        var fileData = { name: file.name, data: file };
-        var addRequest = store.add(fileData);
-        
-        addRequest.onsuccess = function() {
-          savedCount++;
-          if (savedCount === files.length) {
-            // Herlaad de data vanuit de database voor stabiliteit
-            loadSavedMusic(type);
-          }
+        request.onupgradeneeded = function(e) {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("playlistW")) db.createObjectStore("playlistW", { keyPath: "id", autoIncrement: true });
+            if (!db.objectStoreNames.contains("playlistL")) db.createObjectStore("playlistL", { keyPath: "id", autoIncrement: true });
         };
-      });
+
+        request.onsuccess = function(e) {
+            db = e.target.result;
+            loadMusicFromDB();
+        };
+
+        request.onerror = function() {
+            document.getElementById('loader').innerText = "Database fout ❌";
+        };
     }
 
-    function checkButtonStatus() {
-      var startBtn = document.getElementById('start-btn');
-      if (rawFilesA.length > 0 && rawFilesB.length > 0) {
-        startBtn.disabled = false;
-        startBtn.innerHTML = "Start Muziek en Shuffle";
-        document.getElementById('status').innerHTML = "Systeem staat stand-by";
-        document.getElementById('track').innerHTML = "Klaar om te starten";
-      } else {
-        startBtn.disabled = true;
-        startBtn.innerHTML = "Kies voor BEIDE lijsten muziek";
-        document.getElementById('status').innerHTML = "Systeem incompleet";
-        document.getElementById('track').innerHTML = "Voeg muziek toe aan A en B";
-      }
+    // 3. Muziek inladen uit de lokale database
+    function loadMusicFromDB() {
+        if (!db) return;
+        
+        let txW = db.transaction("playlistW", "readonly");
+        txW.objectStore("playlistW").getAll().onsuccess = function(e1) {
+            playlists.w = e1.target.result;
+            
+            let txL = db.transaction("playlistL", "readonly");
+            txL.objectStore("playlistL").getAll().onsuccess = function(e2) {
+                playlists.l = e2.target.result;
+                
+                document.getElementById('loader').innerText = `W: ${playlists.w.length} | L: ${playlists.l.length} nummers opgeslagen`;
+                renderTrackManagementLists();
+            };
+        };
     }
 
-    function startPlayer() {
-      if (isPlaying) return;
-      isPlaying = true;
-      
-      document.getElementById('start-btn').style.display = 'none';
-      document.getElementById('shuffle-indicator').style.display = 'inline-block';
-      
-      var bars = document.getElementsByClassName('wave-bar');
-      for(var i=0; i<bars.length; i++) bars[i].style.display = 'block';
+    // 4. Bestanden toevoegen (Uploaden naar browser)
+    function addFilesToDB(type, inputElement) {
+        const files = inputElement.files;
+        if (files.length === 0) return;
 
-      shuffleAndLoadCurrentPlaylist();
-      setInterval(switchPlaylist, 60000);
+        document.getElementById('loader').innerText = "Bezig met verwerken... ⏳";
+        const tx = db.transaction("playlist" + type, "readwrite");
+        const store = tx.objectStore("playlist" + type);
+
+        let count = 0;
+        Array.from(files).forEach(file => {
+            const trackData = { name: file.name.replace(/\.[^/.]+$/, ""), fileBlob: file };
+            const request = store.add(trackData);
+            
+            request.onsuccess = function() {
+                count++;
+                if (count === files.length) {
+                    loadMusicFromDB();
+                    inputElement.value = ""; 
+                }
+            };
+        });
     }
 
-    function shuffleAndLoadCurrentPlaylist() {
-      var sourceList = (currentPlaylist === 'A') ? [...rawFilesA] : [...rawFilesB];
-
-      if (sourceList.length === 0) {
-        document.getElementById('track').innerHTML = "Geselecteerde lijst is leeg!";
-        return;
-      }
-
-      for (var i = sourceList.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = sourceList[i];
-        sourceList[i] = sourceList[j];
-        sourceList[j] = temp;
-      }
-
-      shuffledPlaylist = sourceList;
-      currentIndex = 0;
-      
-      playCurrentTrack();
+    // 5. Bestanden verwijderen
+    function deleteTrack(type, id) {
+        const tx = db.transaction("playlist" + type, "readwrite");
+        const store = tx.objectStore("playlist" + type);
+        store.delete(id).onsuccess = function() {
+            loadMusicFromDB();
+        };
     }
 
-    function playCurrentTrack() {
-      activeAudio.pause();
-      
-      if (currentIndex >= shuffledPlaylist.length) {
-        shuffleAndLoadCurrentPlaylist();
-        return;
-      }
+    // 6. Beheerscherm updaten
+    function renderTrackManagementLists() {
+        ['W', 'L'].forEach(type => {
+            const container = document.getElementById('list-' + type);
+            container.innerHTML = "";
+            const currentList = playlists[type.toLowerCase()];
+            
+            if (!currentList || currentList.length === 0) {
+                container.innerHTML = "<span style='color:#555;'>Geen nummers</span>";
+                return;
+            }
 
-      var fileObject = shuffledPlaylist[currentIndex];
-      // Haal het pure bestand (Blob) uit de database-structuur
-      var fileURL = URL.createObjectURL(fileObject.data);
-      
-      document.getElementById('status').innerHTML = "Actieve Lijst: <b>Afspeellijst " + currentPlaylist + "</b>";
-      document.getElementById('track').innerHTML = fileObject.name.replace(/\.[^/.]+$/, "");
-
-      activeAudio.src = fileURL;
-      activeAudio.play().catch(e => console.log("Afspeelfout: ", e));
-
-      activeAudio.onended = function() {
-        currentIndex++;
-        playCurrentTrack();
-      };
+            currentList.forEach(track => {
+                const div = document.createElement('div');
+                div.className = 'track-item';
+                div.innerHTML = `<span>🎵 ${track.name}</span> <button class="delete-btn" onclick="deleteTrack('${type}', ${track.id})">wissen</button>`;
+                container.appendChild(div);
+            });
+        });
     }
 
-    function switchPlaylist() {
-      currentPlaylist = (currentPlaylist === 'A') ? 'B' : 'A';
-      shuffleAndLoadCurrentPlaylist();
+    function toggleTrackList() {
+        const el = document.getElementById('trackListWrapper');
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
     }
-  </script>
-</body>
-</html>
+
+    // 7. Muziek afspelen
+    function speelMuziek(type) {
+        const cat = type.toLowerCase();
+        const lijst = playlists[cat];
+        if (lijst && lijst.length > 0) {
+            const track = lijst[Math.floor(Math.random() * lijst.length)];
+            document.getElementById('track-name').innerText = "🎵 " + track.name;
+            
+            player.src = URL.createObjectURL(track.fileBlob);
+            player.load();
+            player.play().catch(() => {
+                document.getElementById('track-name').innerText = "⚠️ Klik play om te starten";
+            });
+
+            player.onended = () => speelMuziek(type);
+        } else {
+            document.getElementById('track-name').innerText = `Geen muziek in lijst ${type.toUpperCase()}`;
+        }
+    }
+
+    // 8. Trainingsschema en timer-loop
+    async function runLes(lesNr) {
+        if (timerInterval) clearInterval(timerInterval);
+        
+        const wandelTijd = lesNr <= 5 ? 1 : 2; 
+        const loopTijd = lesNr; 
+        const schema = `${wandelTijd}w-${loopTijd}l-${wandelTijd}w`; 
+        
+        const segs = schema.match(/(\d+[wl])/g);
+        spreekUit(`Les ${lesNr} gestart.`);
+
+        for (let s of segs) {
+            let tijd = parseInt(s) * 60;
+            let type = s.slice(-1);
+            document.getElementById('current-mode').innerText = type === 'w' ? "Wandelen" : "Hardlopen";
+            
+            speelMuziek(type);
+            spreekUit(`Nu ${parseInt(s)} ${parseInt(s) === 1 ? 'minuut' : 'minuten'} ${type === 'w' ? 'wandelen' : 'hardlopen'}`);
+            
+            await new Promise(resolve => {
