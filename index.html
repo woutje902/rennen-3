@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <title>HardloopApp Pro</title>
-    <script>
-        // Dit laadt automatisch de volledige, foutloze code in zonder knippen
-        fetch('https://githubusercontent.com some-ai-storage/runapp/main/app.html')
-            .then(res => res.text())
-            .then(html => document.write(html));
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HardloopApp Test</title>
+<style>
+    body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+    #player-ui { background: #282828; padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto 20px auto; }
+    .test-banner { background: #e74c3c; color: white; padding: 10px; margin: 20px auto; max-width: 400px; border-radius: 8px; font-weight: bold; }
+    .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-width: 500px; margin: 0 auto; }
+    .lesson-card { background: #181818; padding: 15px; border-radius: 10px; border: 1px solid #333; }
+    .start-btn { background: #2ecc71; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-weight: bold; }
+</style>
 </head>
 <body>
+
+    <div id="player-ui">
+        <h3>Muziekspeler</h3>
+        <audio id="mainPlayer" controls style="width:100%;"></audio>
+    </div>
+
+    <!-- DE SIMPELE TEST-TEKST -->
+    <div class="test-banner">
+        ✅ DE CODE WERKT EN LAADT SUCCESVOL IN!
+    </div>
+
+    <!-- HET LESSEN GRID -->
+    <div class="lesson-grid" id="lessonGrid"></div>
+
+<script>
+    // Direct de 30 lessen opbouwen zonder ingewikkelde database-functies
+    const grid = document.getElementById('lessonGrid');
+    for (let i = 1; i <= 30; i++) {
+        const card = document.createElement('div');
+        card.className = 'lesson-card';
+        card.innerHTML = `<strong>Les ${i}</strong><br><button class="start-btn">START</button>`;
+        grid.appendChild(card);
+    }
+</script>
 </body>
 </html>
