@@ -214,4 +214,34 @@
             speelMuziek(type);
             spreekUit(`Nu ${parseInt(s)} ${parseInt(s) === 1 ? 'minuut' : 'minuten'} ${type === 'w' ? 'wandelen' : 'hardlopen'}`);
             
-            await new Promise(resolve => {
+            await new Promise(resolve => {                timerInterval = setInterval(() => {
+                    let m = Math.floor(tijd/60), sec = tijd%60;
+                    document.getElementById('timer').innerText = `${m}:${sec < 10 ? '0'+sec : sec}`;
+                    if (tijd <= 0) {
+                        clearInterval(timerInterval);
+                        resolve();
+                    }
+                    tijd--;
+                }, 1000);
+            });
+        }
+        player.pause();
+        document.getElementById('track-name').innerText = "Geen muziek";
+        document.getElementById('current-mode').innerText = "VOLTOOID";
+        spreekUit("Training voltooid! Goed gedaan.");
+    }
+
+    function spreekUit(t) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(t);
+        msg.lang = 'nl-NL';
+        window.speechSynthesis.speak(msg);
+    }
+
+    // UITVOERING BIJ STARTEN PAGINA
+    bouwLessenGrid(); 
+    initDB();         
+</script>
+</body>
+</html>
+
